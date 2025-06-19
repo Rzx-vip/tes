@@ -3,98 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Menfess RezzX</title>
-  <link rel="icon" href="https://i.ibb.co/wgNSNMc/rzxbanner.jpg">
+  <title>RezzX Menfess 🔥</title>
   <style>
     body {
       background: #0f172a;
       color: #f1f5f9;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
+      font-family: sans-serif;
+      padding: 20px;
     }
     h1 {
       color: #38bdf8;
-      text-shadow: 1px 1px 5px black;
     }
-    input, textarea {
+    input, textarea, button {
+      display: block;
       width: 100%;
-      max-width: 400px;
-      padding: 12px;
       margin: 10px 0;
-      border: none;
+      padding: 12px;
       border-radius: 8px;
-      background: #1e293b;
-      color: #f1f5f9;
+      border: none;
     }
     button {
-      padding: 12px 20px;
       background: #38bdf8;
-      border: none;
-      border-radius: 8px;
-      color: #0f172a;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 10px;
     }
-    .status {
+    #status {
       margin-top: 15px;
-      font-size: 14px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>💌 Kirim Menfess Rahasia</h1>
-  <input type="text" id="fakeName" placeholder="Nama Palsu (Fake)" required />
-  <input type="text" id="targetNumber" placeholder="Nomor WhatsApp Tujuan (628xxx)" required />
-  <textarea id="message" rows="5" placeholder="Isi Pesan Menfess..." required></textarea>
-  <button onclick="kirimMenfess()">🚀 Kirim Menfess</button>
-  <div class="status" id="status"></div>
+  <h1>🕵️‍♂️ Kirim Menfess Rahasia</h1>
+
+  <input type="text" id="fake" placeholder="Nama Fake (Anonim)" />
+  <input type="text" id="target" placeholder="Nomor Target (628xxx)" />
+  <textarea id="pesan" rows="5" placeholder="Tulis pesan rahasiamu..."></textarea>
+  <button onclick="kirimMenfess()">🚀 Kirim</button>
+
+  <div id="status"></div>
 
   <script>
     async function kirimMenfess() {
-      const fake = document.getElementById('fakeName').value.trim();
-      const target = document.getElementById('targetNumber').value.trim();
-      const pesan = document.getElementById('message').value.trim();
-      const statusBox = document.getElementById('status');
+      const fake = document.getElementById('fake').value.trim();
+      const target = document.getElementById('target').value.trim();
+      const pesan = document.getElementById('pesan').value.trim();
+      const status = document.getElementById('status');
 
       if (!fake || !target || !pesan) {
-        statusBox.innerHTML = '❌ Harap isi semua kolom.';
+        status.textContent = "❌ Semua kolom wajib diisi!";
         return;
       }
 
-      const now = new Date();
-      const tanggal = now.toLocaleDateString('id-ID');
-      const jam = now.toLocaleTimeString('id-ID');
-
-      const data = {
-        fake,
-        target,
-        pesan,
-        waktu: `${tanggal} ${jam}`
-      };
-
-      statusBox.innerHTML = '⏳ Mengirim...';
+      const waktu = new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        day: "numeric", month: "long", year: "numeric",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
 
       try {
         const res = await fetch("https://api.myjson.online/v1/records/225428fb-c216-4b21-b571-515b49275011", {
-          method: 'POST',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(data)
+          body: JSON.stringify({
+            fake: fake,
+            target: target,
+            pesan: pesan,
+            waktu: waktu
+          })
         });
 
-        if (res.ok) {
-          statusBox.innerHTML = '✅ Menfess berhasil dikirim!';
-        } else {
-          statusBox.innerHTML = '❌ Gagal mengirim. Coba lagi.';
-        }
-      } catch (err) {
-        statusBox.innerHTML = '❌ Error jaringan.';
-        console.error(err);
+        if (!res.ok) throw new Error("Gagal update");
+
+        status.textContent = "✅ Menfess berhasil dikirim!";
+        document.getElementById("fake").value = "";
+        document.getElementById("target").value = "";
+        document.getElementById("pesan").value = "";
+      } catch (e) {
+        status.textContent = "❌ Gagal mengirim. Coba lagi.";
+        console.error(e);
       }
     }
   </script>
