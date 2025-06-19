@@ -62,8 +62,8 @@
       });
 
       try {
-        const res = await axios.get("https://api.myjson.online/v1/records/225428fb-c216-4b21-b571-515b49275011", {
-          method: "GET",
+        const res = await fetch("https://api.myjson.online/v1/records/225428fb-c216-4b21-b571-515b49275011", {
+          method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
