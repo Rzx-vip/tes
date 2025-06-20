@@ -3,87 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RezzX Menfess 🔥</title>
+  <title>Login OTP Panel</title>
   <style>
     body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
       background: #0f172a;
       color: #f1f5f9;
-      font-family: sans-serif;
-      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    h1 {
-      color: #38bdf8;
+    .container {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px #38bdf8;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
     }
-    input, textarea, button {
-      display: block;
+    input {
       width: 100%;
+      padding: 10px;
       margin: 10px 0;
-      padding: 12px;
-      border-radius: 8px;
       border: none;
+      border-radius: 8px;
+      font-size: 16px;
     }
     button {
+      padding: 10px 20px;
       background: #38bdf8;
+      color: #fff;
       font-weight: bold;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
     }
-    #status {
+    #notif {
       margin-top: 15px;
-      font-weight: bold;
+      background: #dc2626;
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1>🕵️‍♂️ Kirim Menfess Rahasia Disini bro</h1>
+  <div class="container">
+    <h2>🔐 Login Panel OTP</h2>
 
-  <input type="text" id="fake" placeholder="Nama Fake (Anonim)" />
-  <input type="text" id="target" placeholder="Nomor Target (628xxx)" />
-  <textarea id="pesan" rows="5" placeholder="Tulis pesan rahasiamu..."></textarea>
-  <button onclick="kirimMenfess()">🚀 Kirim</button>
+    <input type="text" id="nomorwa" placeholder="Masukkan Nomor WhatsApp (62xxx)">
+    <button onclick="kirimOTP()">Kirim Kode OTP</button>
 
-  <div id="status"></div>
+    <input type="text" id="kodeotp" placeholder="Masukkan Kode OTP">
+    <button onclick="verifikasiOTP()">Login Sekarang</button>
+
+    <div id="notif"></div>
+  </div>
 
   <script>
-    async function kirimMenfess() {
-      const fake = document.getElementById('fake').value.trim();
-      const target = document.getElementById('target').value.trim();
-      const pesan = document.getElementById('pesan').value.trim();
-      const status = document.getElementById('status');
+    const nomorBot = "62895630529700";
+    let kodeLoginAcak = "";
+    const urlSimpan = "https://api.myjson.online/v1/records/e1f393c7-9b68-47de-b90d-2b6f3defd4ec";
 
-      if (!fake || !target || !pesan) {
-        status.textContent = "❌ Semua kolom wajib diisi!";
+    function kirimOTP() {
+      const no = document.getElementById("nomorwa").value.trim();
+      if (!no || !/^62\d{8,15}$/.test(no)) return alert("❌ Masukkan nomor WA valid!");
+
+      // Generate kode acak 6 karakter
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let kode = '';
+      for (let i = 0; i < 6; i++) kode += chars.charAt(Math.floor(Math.random() * chars.length));
+      kodeLoginAcak = kode;
+
+      // Simpan kode OTP ke myjson.online
+      fetch(urlSimpan, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nomor: no, kode: kode })
+      }).then(res => res.json())
+        .then(() => {
+          // Kirim ke bot lewat WhatsApp redirect
+          window.open(`https://wa.me/${nomorBot}?text=Kode+OTP+untuk+login+adalah:+${kode}`, '_blank');
+        }).catch(() => alert("❌ Gagal menyimpan data ke myjson.online"));
+    }
+
+    function verifikasiOTP() {
+      const inputKode = document.getElementById("kodeotp").value.trim();
+      const notif = document.getElementById("notif");
+
+      if (!inputKode) {
+        notif.style.display = "block";
+        notif.innerText = "⚠️ Kode OTP belum diisi!";
         return;
       }
 
-      const waktu = new Date().toLocaleString("id-ID", {
-        timeZone: "Asia/Jakarta",
-        day: "numeric", month: "long", year: "numeric",
-        hour: "2-digit", minute: "2-digit", second: "2-digit"
-      });
-
-      try {
-        const res = await fetch("https://api.myjson.online/v1/records/225428fb-c216-4b21-b571-515b49275011", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            fake: fake,
-            target: target,
-            pesan: pesan,
-            waktu: waktu
-          })
-        });
-
-        if (!res.ok) throw new Error("Gagal update");
-
-        status.textContent = "✅ Menfess berhasil dikirim!";
-        document.getElementById("fake").value = "";
-        document.getElementById("target").value = "";
-        document.getElementById("pesan").value = "";
-      } catch (e) {
-        status.textContent = "❌ Gagal mengirim. Coba lagi.";
-        console.error(e);
+      if (inputKode !== kodeLoginAcak) {
+        notif.style.display = "block";
+        notif.innerText = "❌ Kode OTP salah!";
+      } else {
+        notif.style.display = "none";
+        alert("✅ Kode OTP benar! Login berhasil!");
+        window.location.href = "dashboard.html";
       }
     }
   </script>
