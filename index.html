@@ -65,9 +65,8 @@
   </div>
 
   <script>
-    const nomorBot = "62895630529700";
     let kodeLoginAcak = "";
-    const urlSimpan = "https://api.myjson.online/v1/records/e1f393c7-9b68-47de-b90d-2b6f3defd4ec";
+    const urlSimpan = "https://api.myjson.online/v1/records/e1f393c7-9b68-47de-b90d-2b6f3defd4ec"; // Ganti sesuai ID project lo
 
     function showNotif(pesan, danger = true) {
       const notif = document.getElementById("notif");
@@ -85,9 +84,12 @@
       for (let i = 0; i < 6; i++) kode += chars.charAt(Math.floor(Math.random() * chars.length));
       kodeLoginAcak = kode;
 
+      const waktu = new Date().toLocaleString('id-ID');
+
       const data = {
         nomor: no,
-        kode: kode
+        kode: kode,
+        waktu: waktu
       };
 
       fetch(urlSimpan, {
@@ -98,8 +100,7 @@
       .then(res => res.json())
       .then(json => {
         console.log("✅ Disimpan ke MyJSON:", json);
-        showNotif("✅ OTP dikirim ke WhatsApp!", false);
-        window.open(`https://wa.me/${nomorBot}?text=Kode+OTP+untuk+login+adalah:+${kode}`, '_blank');
+        showNotif("✅ Kode OTP berhasil dibuat. Bot akan kirim otomatis!", false);
       })
       .catch(err => {
         console.error("❌ Gagal simpan:", err);
