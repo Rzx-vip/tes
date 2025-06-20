@@ -69,45 +69,53 @@
     let kodeLoginAcak = "";
     const urlSimpan = "https://api.myjson.online/v1/records/e1f393c7-9b68-47de-b90d-2b6f3defd4ec";
 
+    function showNotif(pesan, danger = true) {
+      const notif = document.getElementById("notif");
+      notif.style.display = "block";
+      notif.style.background = danger ? "#dc2626" : "#16a34a";
+      notif.innerText = pesan;
+    }
+
     function kirimOTP() {
       const no = document.getElementById("nomorwa").value.trim();
-      if (!no || !/^62\d{8,15}$/.test(no)) return alert("❌ Masukkan nomor WA valid!");
+      if (!no || !/^62\d{8,15}$/.test(no)) return showNotif("❌ Masukkan nomor WA valid!");
 
-      // Generate kode acak 6 karakter
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       let kode = '';
       for (let i = 0; i < 6; i++) kode += chars.charAt(Math.floor(Math.random() * chars.length));
       kodeLoginAcak = kode;
 
-      // Simpan kode OTP ke myjson.online
+      const data = {
+        nomor: no,
+        kode: kode
+      };
+
       fetch(urlSimpan, {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomor: no, kode: kode })
-      }).then(res => res.json())
-        .then(() => {
-          // Kirim ke bot lewat WhatsApp redirect
-          window.open(`https://wa.me/${nomorBot}?text=Kode+OTP+untuk+login+adalah:+${kode}`, '_blank');
-        }).catch(() => alert("❌ Gagal menyimpan data ke myjson.online"));
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(json => {
+        console.log("✅ Disimpan ke MyJSON:", json);
+        showNotif("✅ OTP dikirim ke WhatsApp!", false);
+        window.open(`https://wa.me/${nomorBot}?text=Kode+OTP+untuk+login+adalah:+${kode}`, '_blank');
+      })
+      .catch(err => {
+        console.error("❌ Gagal simpan:", err);
+        showNotif("⚠️ Gagal menyimpan ke MyJSON. Coba lagi.");
+      });
     }
 
     function verifikasiOTP() {
       const inputKode = document.getElementById("kodeotp").value.trim();
-      const notif = document.getElementById("notif");
-
-      if (!inputKode) {
-        notif.style.display = "block";
-        notif.innerText = "⚠️ Kode OTP belum diisi!";
-        return;
-      }
+      if (!inputKode) return showNotif("⚠️ Kode OTP belum diisi!");
 
       if (inputKode !== kodeLoginAcak) {
-        notif.style.display = "block";
-        notif.innerText = "❌ Kode OTP salah!";
+        showNotif("❌ Kode OTP salah!");
       } else {
-        notif.style.display = "none";
-        alert("✅ Kode OTP benar! Login berhasil!");
-        window.location.href = "dashboard.html";
+        showNotif("✅ Kode OTP benar!", false);
+        setTimeout(() => window.location.href = "dashboard.html", 1000);
       }
     }
   </script>
